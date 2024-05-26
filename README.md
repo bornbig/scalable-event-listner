@@ -1,40 +1,45 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a nextJS Project developed to demonstrate a scalable solution to listen to events and save it to the databse.
 
-## Getting Started
+Problem:
+Events can be emitted multiple times with in a sececond, specially if you are listning to a large number of smart contracts. Query database every time you get an event can make the DB non usable.
 
-First, run the development server:
+Solution:
+There are two files under cron folder:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. activityListner.js
+This file listen to one or multiple smart contracts ( Right now designed just to listen one).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Improvements: We can make it to listen to multiple contracts by taking array as an input and looping the code inside the "start" function.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+This file is responsible to create unique files as and when we get an event from a contract, these files should be unique so that we dont overwrite an event to another. We are using the contract address, a random number and timestamp so that it can never colide with each other the random number makes it even safer, as if the time colides.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Theoritically a folder in an ext4 system can hold upto 10,000,000 files. That means we can save 10M events for now. Asuming, we are getting 1M events per minute, we can save 5M files per minute.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+We also refresh our wss connectio every 2 minutes for better reliablity.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+2. moveFilesToDB
+This file takes a snapshot of the files in every 5 minutes and take the entire to push it to the DB, this creates one write call to the DB. After saving all the data, it deletes all the files so that we can take new files in the next 5 minutes.
 
-## Learn More
+Improvements: We can also use redis cache here so that we can save 100-500 latest records for easy access.
 
-To learn more about Next.js, take a look at the following resources:
+These two files need to be run through something like pm2 parallaly with the nextJs project.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+API
+/api/v1/nft/activity
+This gives us the list of latest 100 activity saved
 
-## Deploy on Vercel
+Improvements: We can enable redis cache to be taken here ( if present ), this will make delivery easy and scalable.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+Frontend
+index.js
+It has a small UI that calls the api to display the latest activity fetched by the system.
+
+
+DB Config
+config/connection.js
+
+Modal
+modal/ActivityModal

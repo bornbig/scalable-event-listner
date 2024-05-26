@@ -1,0 +1,51 @@
+.tab:first-child{
+    margin-top: 20px;
+}
+
+.tab:last-child{
+    margin-bottom: 20px;
+}
+
+.tab{
+    align-items: center;
+}
+
+.tab img{
+    height: 100%;
+    border-radius: 8px;
+}
+
+.tab .addr{
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.tab .name{
+    font-weight: 600;
+}
+
+.tab .ticker{
+    font-size: 12px;
+}
+
+.tab + .tab{
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #ccc;
+}
+
+.w640px{
+    width: 800px;
+}
+
+
+.loading{
+    width: 40px;
+    margin: auto;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.loading img{
+    height: 40px;
+}
