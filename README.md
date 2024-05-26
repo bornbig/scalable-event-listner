@@ -1,12 +1,12 @@
-This is a nextJS Project developed to demonstrate a scalable solution to listen to events and save it to the databse.
+# This is a nextJS Project developed to demonstrate a scalable solution to listen to events and save it to the databse.
 
-Problem:
+## Problem:
 Events can be emitted multiple times with in a sececond, specially if you are listning to a large number of smart contracts. Query database every time you get an event can make the DB non usable.
 
-Solution:
+## Solution:
 There are two files under cron folder:
 
-1. activityListner.js
+### 1. activityListner.js
 This file listen to one or multiple smart contracts ( Right now designed just to listen one).
 
 Improvements: We can make it to listen to multiple contracts by taking array as an input and looping the code inside the "start" function.
@@ -17,7 +17,7 @@ Theoritically a folder in an ext4 system can hold upto 10,000,000 files. That me
 
 We also refresh our wss connectio every 2 minutes for better reliablity.
 
-2. moveFilesToDB
+### 2. moveFilesToDB
 This file takes a snapshot of the files in every 5 minutes and take the entire to push it to the DB, this creates one write call to the DB. After saving all the data, it deletes all the files so that we can take new files in the next 5 minutes.
 
 Improvements: We can also use redis cache here so that we can save 100-500 latest records for easy access.
@@ -25,21 +25,29 @@ Improvements: We can also use redis cache here so that we can save 100-500 lates
 These two files need to be run through something like pm2 parallaly with the nextJs project.
 
 
-API
+## API
+```
 /api/v1/nft/activity
+```
 This gives us the list of latest 100 activity saved
 
 Improvements: We can enable redis cache to be taken here ( if present ), this will make delivery easy and scalable.
 
 
 
-Frontend
+## Frontend
+```
 index.js
+```
 It has a small UI that calls the api to display the latest activity fetched by the system.
 
 
-DB Config
+## DB Config
+```
 config/connection.js
+```
 
-Modal
+## Modal
+```
 modal/ActivityModal
+```
