@@ -1,53 +1,51 @@
-# This is a nextJS Project developed to demonstrate a scalable solution to listen to events and save it to the databse.
+# Scalable Event Listener
 
-## Problem:
-Events can be emitted multiple times with in a sececond, specially if you are listning to a large number of smart contracts. Query database every time you get an event can make the DB non usable.
+This Next.js project demonstrates a scalable solution for listening to events and saving them to a database efficiently.
 
-## Solution:
-There are two files under cron folder:
+## Problem
 
-### 1. activityListner.js
-This file listen to one or multiple smart contracts ( Right now designed just to listen one).
+Events can be emitted multiple times per second, especially when listening to a large number of smart contracts. Querying the database for each event can overwhelm the DB.
 
-Improvements: We can make it to listen to multiple contracts by taking array as an input and looping the code inside the "start" function.
+## Solution
 
-This file is responsible to create unique files as and when we get an event from a contract, these files should be unique so that we dont overwrite an event to another. We are using the contract address, a random number and timestamp so that it can never colide with each other the random number makes it even safer, as if the time colides.
+### Components
 
-Theoritically a folder in an ext4 system can hold upto 10,000,000 files. That means we can save 10M events for now. Asuming, we are getting 1M events per minute, we can save 5M files per minute.
+#### 1. `activityListner.js`
+- Listens to one or multiple smart contracts (currently designed for one).
+- Creates unique files for each event using contract address, a random number, and a timestamp to avoid collisions.
+- Refreshes the WebSocket connection every 2 minutes for reliability.
 
-We also refresh our wss connectio every 2 minutes for better reliablity.
+#### 2. `moveFilesToDB.js`
+- Takes snapshots of the event files every 5 minutes and writes them to the database in bulk.
+- Deletes the files after saving the data to prepare for the next batch.
 
-### 2. moveFilesToDB
-This file takes a snapshot of the files in every 5 minutes and take the entire to push it to the DB, this creates one write call to the DB. After saving all the data, it deletes all the files so that we can take new files in the next 5 minutes.
-
-Improvements: We can also use redis cache here so that we can save 100-500 latest records for easy access.
-
-These two files need to be run through something like pm2 parallaly with the nextJs project.
-
+### Improvements
+- Modify `activityListner.js` to handle multiple contracts by accepting an array.
+- Use Redis cache for recent records to improve access speed.
+- Implement Redis cache in the API for scalable data delivery.
 
 ## API
-```
-/api/v1/nft/activity
-```
-This gives us the list of latest 100 activity saved
 
-Improvements: We can enable redis cache to be taken here ( if present ), this will make delivery easy and scalable.
-
-
+### Endpoint
+- `/api/v1/nft/activity`: Returns the latest 100 activities.
 
 ## Frontend
-```
-index.js
-```
-It has a small UI that calls the api to display the latest activity fetched by the system.
 
+- `index.js`: Displays the latest activities fetched by the system.
 
-## DB Config
-```
-config/connection.js
-```
+## Database Configuration
 
-## Modal
-```
-modal/ActivityModal
-```
+- `config/connection.js`: Manages the DB connection settings.
+
+## Model
+
+- `modal/ActivityModal.js`: Defines the schema for storing activities.
+
+## Running the Project
+
+1. **Setup**: Install dependencies using `npm install`.
+2. **Start the Listener and Mover**: Use a process manager like `pm2` to run `activityListner.js` and `moveFilesToDB.js` in parallel with the Next.js server.
+
+## About
+
+No additional description, website, or topics provided.
